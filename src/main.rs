@@ -1,16 +1,14 @@
-aoc::aoc!(part1, part2 as String);
+aoc::aoc!(part1, part2 as Vec<(i64, i64)>);
 
 fn input(inp: String) -> Data {
-    inp
+    inp.ltv(|l| (l.starts_with("R").as_sign(), l.ints()[0]))
 }
 
 fn part1(inp: Data) -> u64 {
     let mut sum = 0;
     let mut curr = 50;
-    for l in inp.lines() {
-        let prefix = l.starts_with("R").as_sign();
-        let dist: i64 = l[1..].parse().unwrap();
-        curr = (curr + 100 + dist * prefix) % 100;
+    for (dir, dist) in inp {
+        curr = (curr + dist * dir).rem_euclid(100);
         if curr == 0 {
             sum += 1;
         }
@@ -21,11 +19,9 @@ fn part1(inp: Data) -> u64 {
 fn part2(inp: Data) -> u64 {
     let mut sum = 0;
     let mut curr = 50;
-    for l in inp.lines() {
-        let prefix = l.starts_with("R").as_sign();
-        let dist = l[1..].parse().unwrap();
+    for (dir, dist) in inp {
         for _ in 0..dist {
-            curr = (curr + prefix).rem_euclid(100);
+            curr = (curr + dir).rem_euclid(100);
             if curr == 0 {
                 sum += 1;
             }
