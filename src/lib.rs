@@ -67,3 +67,13 @@ macro_rules! cmp_macro {
 }
 
 cmp_macro! [eq ne le lt ge gt];
+
+pub trait BoolExt {
+    fn as_sign(self) -> i64;
+}
+
+impl BoolExt for bool {
+    fn as_sign(self) -> i64 {
+        if self { 1 } else { -1 }
+    }
+}
