@@ -85,8 +85,14 @@ impl StrExt for str {
     }
 }
 
-pub trait FromVec<T> {
-    fn from_vec(val: Vec<T>) -> Self;
+pub trait FromVec<T>: Sized {
+    const N: usize;
+
+    fn from_vec(val: Vec<T>) -> Self {
+        Self::from_iter(val.into_iter())
+    }
+
+    fn from_iter(iter: impl Iterator<Item = T>) -> Self;
 }
 
 macro_rules! first_token {
@@ -96,22 +102,23 @@ macro_rules! first_token {
 }
 
 macro_rules! impl_from_vec {
-    ($first:tt $($t:tt)*) => {
+    ($n:expr, $first:tt $($t:tt)*) => {
         impl<T> FromVec<T> for (T, $(first_token!(T $t)),*) {
-            fn from_vec(val: Vec<T>) -> Self {
-                let mut iter = val.into_iter();
+            const N: usize = $n;
+
+            fn from_iter(mut iter: impl Iterator<Item = T>) -> Self {
                 (
                     iter.next().unwrap(),
                     $(first_token!(iter $t).next().unwrap()),*
                 )
             }
         }
-        impl_from_vec!($($t)*);
+        impl_from_vec!($n - 1, $($t)*);
     };
-    () => {}
+    ($_:expr,) => {}
 }
 
-impl_from_vec!(* * * * * * * * * * * *);
+impl_from_vec!(12, * * * * * * * * * * * *);
 
 #[cfg(test)]
 mod test {

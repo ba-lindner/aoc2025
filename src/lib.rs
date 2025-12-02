@@ -16,7 +16,9 @@ pub fn inp() -> String {
     let mut path = std::env::args()
         .nth(1)
         .unwrap_or("inp/test.txt".to_string());
-    if let Ok(day) = path.parse::<u8>() {
+    if path.starts_with("t") || path.starts_with("T") {
+        path = "inp/test.txt".to_string();
+    } else if let Ok(day) = path.parse::<u8>() {
         path = format!("inp/{day}.txt");
     }
     if path.contains("test") {

@@ -5,6 +5,8 @@ use std::{
     ops::{Add, AddAssign, MulAssign},
 };
 
+use crate::FromVec;
+
 pub trait HashMapExt<K, V> {
     /// Set a value, or update it if the key already exists
     ///
@@ -96,6 +98,12 @@ pub trait VecExt<T> {
     fn sum(self) -> T
     where
         T: Sum;
+    fn tuple<R>(self) -> R
+    where
+        R: FromVec<T>;
+    fn chunk_tuples<R>(self) -> Vec<R>
+    where
+        R: FromVec<T>;
 }
 
 impl<T> VecExt<T> for Vec<T> {
@@ -144,6 +152,26 @@ impl<T> VecExt<T> for Vec<T> {
         T: Sum,
     {
         self.into_iter().sum()
+    }
+
+    fn tuple<R>(self) -> R
+    where
+        R: FromVec<T>,
+    {
+        R::from_vec(self)
+    }
+
+    fn chunk_tuples<R>(self) -> Vec<R>
+    where
+        R: FromVec<T>,
+    {
+        let res_len = self.len() / R::N;
+        let mut iter = self.into_iter();
+        let mut res = Vec::new();
+        for _ in 0..res_len {
+            res.push(R::from_iter(&mut iter));
+        }
+        res
     }
 }
 
