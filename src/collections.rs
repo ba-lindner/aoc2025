@@ -80,6 +80,15 @@ impl<K: Eq + Hash, K1: Eq + Hash, V> HashMapExtInsert<K, (K1, V)> for HashMap<K,
     }
 }
 
+pub trait SliceExt<T> {
+    fn map_ref<U>(&self, f: impl FnMut(&T) -> U) -> Vec<U>;
+    fn count(&self, f: impl FnMut(&T) -> bool) -> usize;
+    fn add<U>(&self, rhs: &[U]) -> Vec<<T as Add<U>>::Output>
+    where
+        T: Add<U> + Clone,
+        U: Clone;
+}
+
 pub trait VecExt<T> {
     fn to_map<V>(self, v: V) -> HashMap<T, V>
     where
@@ -89,12 +98,6 @@ pub trait VecExt<T> {
     where
         T: PartialEq;
     fn map<U>(self, f: impl FnMut(T) -> U) -> Vec<U>;
-    fn mapr<U>(&self, f: impl FnMut(&T) -> U) -> Vec<U>;
-    fn count(&self, f: impl FnMut(&T) -> bool) -> usize;
-    fn add<U>(&self, rhs: &[U]) -> Vec<<T as Add<U>>::Output>
-    where
-        T: Add<U> + Clone,
-        U: Clone;
     fn sum(self) -> T
     where
         T: Sum;
@@ -104,6 +107,27 @@ pub trait VecExt<T> {
     fn chunk_tuples<R>(self) -> Vec<R>
     where
         R: FromVec<T>;
+}
+
+impl<T> SliceExt<T> for [T] {
+    fn map_ref<U>(&self, f: impl FnMut(&T) -> U) -> Vec<U> {
+        self.iter().map(f).collect()
+    }
+
+    fn add<U>(&self, rhs: &[U]) -> Vec<<T as Add<U>>::Output>
+    where
+        T: Add<U> + Clone,
+        U: Clone,
+    {
+        self.iter()
+            .zip(rhs)
+            .map(|(lhs, rhs)| lhs.clone() + rhs.clone())
+            .collect()
+    }
+
+    fn count(&self, mut f: impl FnMut(&T) -> bool) -> usize {
+        self.iter().filter(|e| f(e)).count()
+    }
 }
 
 impl<T> VecExt<T> for Vec<T> {
@@ -126,25 +150,6 @@ impl<T> VecExt<T> for Vec<T> {
 
     fn map<U>(self, f: impl FnMut(T) -> U) -> Vec<U> {
         self.into_iter().map(f).collect()
-    }
-
-    fn mapr<U>(&self, f: impl FnMut(&T) -> U) -> Vec<U> {
-        self.iter().map(f).collect()
-    }
-
-    fn count(&self, mut f: impl FnMut(&T) -> bool) -> usize {
-        self.iter().filter(|e| f(e)).count()
-    }
-
-    fn add<U>(&self, rhs: &[U]) -> Vec<<T as Add<U>>::Output>
-    where
-        T: Add<U> + Clone,
-        U: Clone,
-    {
-        self.iter()
-            .zip(rhs)
-            .map(|(lhs, rhs)| lhs.clone() + rhs.clone())
-            .collect()
     }
 
     fn sum(self) -> T

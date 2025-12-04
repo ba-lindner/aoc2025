@@ -5,6 +5,16 @@ pub const DIR_NORTH_PARSED: Dir = (-1, 0);
 pub const DIR_NORTH_TRUE: Dir = (0, 1);
 
 pub const ALL_DIRS: [Dir; 4] = [(0, 1), (1, 0), (0, -1), (-1, 0)];
+pub const ALL_DIRS_DIAG: [Dir; 8] = [
+    (1, 1),
+    (1, 0),
+    (1, -1),
+    (0, 1),
+    (0, -1),
+    (-1, 1),
+    (-1, 0),
+    (-1, -1),
+];
 
 pub trait DirExt {
     fn left(&self) -> Self;

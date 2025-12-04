@@ -10,7 +10,7 @@ mod iter;
 pub use creation::*;
 pub use dirs::*;
 
-use crate::{VecExt, maps::iter::PosIter};
+use crate::{SliceExt as _, maps::iter::PosIter};
 
 pub type Pos = (usize, usize);
 
